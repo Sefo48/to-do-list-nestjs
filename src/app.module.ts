@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from "@nestjs/config";
+import { TasksModule } from './tasks/tasks.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -10,7 +12,9 @@ import { ConfigModule } from "@nestjs/config";
     ConfigModule.forRoot({
       envFilePath: '.env'
     }),
-    UsersModule
+    UsersModule,
+    TasksModule,
+    AuthModule
   ]
 })
 

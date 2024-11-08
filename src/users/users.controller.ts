@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     const data = await this.usersService.findAll();
@@ -18,15 +20,15 @@ export class UsersController {
     return { message: 'User created'};
   }
 
-  @Delete(':id')
-  async delete(@Param('id') id: string) {
-    const user = await this.usersService.findById(id)
+  @Delete(':email')
+  async delete(@Param('email') email: string) {
+    const user = await this.usersService.findByEmail(email);
     
     if (!user) {
       return { message: "Item not found" };
     }
 
-    await this.usersService.deleteById(id);
-    return { message: "Item deleted successfully" }
+    await this.usersService.deleteByEmail(email);
+    return { message: "Item deleted successfully" };
   }
 }

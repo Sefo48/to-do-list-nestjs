@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import {promises as fs} from 'fs'
+import { promises as fs } from 'fs'
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  private readonly filePath = 'data.json';
+  private readonly filePath = './data/user.json';
 
-  async createUser(user: CreateUserDto): Promise<void> {
+  async createUser(user: CreateUserDto) {
     let users = [];
     try {
       const data = await fs.readFile(this.filePath, 'utf-8');
@@ -17,10 +17,11 @@ export class UsersService {
 
     users.push(user);
     await fs.writeFile(this.filePath, JSON.stringify(users));
+    return users;
   }
 
-  async findAll(): Promise<any> {
-    try{
+  async findAll() {
+    try {
       const data = await fs.readFile(this.filePath, 'utf-8')
       return JSON.parse(data);
     } catch (error) {
@@ -28,14 +29,14 @@ export class UsersService {
     }
   }
 
-  async findById(id: string): Promise<any> {
+  async findByEmail(email: string) {
     const users = await this.findAll();
-    return users.find(user => user.id === id);
+    return users.find(user => user.email === email);
   }
 
-  async deleteById(id: string): Promise<void> {
+  async deleteByEmail(email: string) {
     const users = await this.findAll();
-    const updatedUsers = users.filter(user => user.id !== id);
+    const updatedUsers = users.filter(user => user.email !== email);
     await fs.writeFile(this.filePath, JSON.stringify(updatedUsers));
   }
 }
