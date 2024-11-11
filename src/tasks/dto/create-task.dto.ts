@@ -13,4 +13,7 @@ export class CreateTaskDto {
 
   @IsBoolean()
   readonly isCheck: boolean;
+
+  @IsString()
+  readonly imageUrl: string
 }

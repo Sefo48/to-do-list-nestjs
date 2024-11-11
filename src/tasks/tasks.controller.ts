@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('tasks')
 export class TasksController {
@@ -44,5 +45,25 @@ export class TasksController {
     const updatedTask = await this.tasksService.patchTask(Number(id), body);
     console.log(updatedTask)
     return updatedTask
+  }
+
+  @Post(':id/media')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadMedia(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+
+    await this.tasksService.updateTaskImage(file, Number(id)); 
+    return { message: 'Image uploaded successfully'};
+  }
+
+  @Get(':id/media')
+  async getMedia(@Param('id') id: string) {
+    const tasks = await this.tasksService.findAll();
+    const task = tasks.find(task => task.id === Number(id));
+
+    if (!task || !task.imageUrl) {
+      return { message: 'Image not found' }; 
+    }
+
+    return { imageUrl: task.imageUrl }; 
   }
 }

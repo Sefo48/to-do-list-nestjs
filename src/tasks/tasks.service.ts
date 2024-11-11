@@ -2,10 +2,13 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { promises as fs } from 'fs'
 import { CreateTaskDto } from './dto/create-task.dto';
 import { BADRESP } from 'dns/promises';
+import { S3Service } from 'src/s3/s3.service';
 
 
 @Injectable()
 export class TasksService {
+  constructor( private s3Service: S3Service) {}
+
   private readonly filePath = './data/task.json';
 
   async createTask(createTaskDto: CreateTaskDto) {
@@ -77,5 +80,21 @@ export class TasksService {
     
     await fs.writeFile(this.filePath, JSON.stringify(tasks));
     return tasksValue
+  }
+
+  async updateTaskImage(file: Express.Multer.File, id: number) {
+    const tasks = await this.findAll();
+    const taskIndex = tasks.findIndex(task => task.id === id);
+
+    if (taskIndex === -1) {
+      return null; 
+    }
+
+    const key = `${file.fieldname}${Date.now()}`
+    const imageUrl = await this.s3Service.uploadFile(file, key)
+    tasks[taskIndex].imageUrl = imageUrl; 
+
+    await fs.writeFile(this.filePath, JSON.stringify(tasks));
+    return tasks[taskIndex]; 
   }
 }
